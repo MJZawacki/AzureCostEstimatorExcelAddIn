@@ -1,0 +1,27 @@
+<h2>My Skus</h2>
+<ul class="skus">
+  <li *ngFor="let sku of skus"
+    [class.selected]="sku === selectedSku"
+    (click)="onSelect(sku)">
+    <span class="badge">{{sku.id}}</span> {{sku.name}}
+  </li>
+</ul>
+
+<!-- <div *ngIf="selectedHero">
+
+  <h2>{{ selectedHero.name | uppercase }} Details</h2>
+  <div><span>id: </span>{{selectedHero.id}}</div>
+  <div>
+    <label>name:
+      <input [(ngModel)]="selectedHero.name" placeholder="name">
+    </label>
+  </div>
+
+</div> -->
+
+
+<!-- 
+Copyright 2017-2018 Google Inc. All Rights Reserved.
+Use of this source code is governed by an MIT-style license that
+can be found in the LICENSE file at http://angular.io/license
+-->

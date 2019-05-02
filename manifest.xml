@@ -9,15 +9,15 @@
   <!-- Begin Basic Settings: Add-in metadata, used for all versions of Office unless override provided. -->
 
   <!-- IMPORTANT! Id must be unique for your add-in, if you reuse this manifest ensure that you change this id to a new GUID. -->
-  <Id>d74059ee-a2db-4b3b-944b-1a648b2de2b9</Id>
+  <Id>43498038-491a-45fc-8239-4a4a6327e961</Id>
 
   <!--Version. Updates from the store only get triggered if there is a version change. -->
   <Version>1.0.0.0</Version>
-  <ProviderName>Microsoft CSE</ProviderName>
+  <ProviderName>[Provider name]</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
   <!-- The display name of your add-in. Used on the store and various places of the Office UI such as the add-ins dialog. -->
-  <DisplayName DefaultValue="Azure Cost Estimator" />
-  <Description DefaultValue="Create a high level view of your cost estimates based on Vms and Storage skus"/>
+  <DisplayName DefaultValue="RateCardAngular" />
+  <Description DefaultValue="[Workbook Add-in description]"/>
 
   <!-- Icon for your add-in. Used on installation screens and the add-ins dialog. -->
   <IconUrl DefaultValue="https://localhost:3000/assets/icon-32.png" />
@@ -28,7 +28,9 @@
 
   <!-- Domains that will be allowed when navigating. For example, if you use ShowTaskpane and then have an href link, navigation will only be allowed if the domain is on this list. -->
   <AppDomains>
-    <AppDomain>https://mzratecardfunc.azurewebsites.net</AppDomain>
+    <AppDomain>AppDomain1</AppDomain>
+    <AppDomain>AppDomain2</AppDomain>
+    <AppDomain>AppDomain3</AppDomain>
   </AppDomains>
   <!--End Basic Settings. -->
 
