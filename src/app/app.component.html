@@ -23,16 +23,8 @@
     
     <br />
     <p class="ms-font-l">Modify the source files, then click <b>Run</b>.</p>
-        <div role="button" class="ms-welcome__action ms-Button ms-Button--hero ms-u-slideUpIn20" (click)="createTable()">
-        <span class="ms-Button-label">Create Table</span>
-        <span class="ms-Button-icon"><i class="ms-Icon ms-Icon--ChevronRight"></i></span>
-    </div>
-    <div role="button" class="ms-welcome__action ms-Button ms-Button--hero ms-u-slideUpIn20" (click)="addRow()">
-        <span class="ms-Button-label">Add Rows</span>
-        <span class="ms-Button-icon"><i class="ms-Icon ms-Icon--ChevronRight"></i></span>
-    </div>
-    <div role="button" class="ms-welcome__action ms-Button ms-Button--hero ms-u-slideUpIn20" (click)="addCostColumns()">
-        <span class="ms-Button-label">Calculate Costs</span>
-        <span class="ms-Button-icon"><i class="ms-Icon ms-Icon--ChevronRight"></i></span>
-    </div>
+        <sc-button [buttonlabel]="'Create Table'" (click)='createTable()'></sc-button>
+        <sc-button [buttonlabel]="'Add Rows'" (click)='addRow()'></sc-button>
+        <sc-button [buttonlabel]="'Calculate Costs'" (click)='addCostColumns()'></sc-button>
+    
 </main>
