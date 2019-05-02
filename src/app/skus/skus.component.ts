@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { Sku } from '../costs/skus.service';
-
-
+const template = require('./skus.component.html');
+const style = require('./skus.component.css');
 @Component({
   selector: 'app-skus',
-  templateUrl: './skus.component.html',
-  styleUrls: ['./skus.component.css']
+  template,
+  styles: [style + '']
 })
 export class SkusComponent implements OnInit {
 
