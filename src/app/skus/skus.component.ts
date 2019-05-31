@@ -10,12 +10,18 @@ import { ErrorObservable } from 'rxjs/observable/ErrorObservable';
 @Component({
   selector: 'app-skus',
   template,
-  styles: [style + '']
+  
+  styles: [`.skulist {
+    height:200px;
+    overflow:hidden;
+    overflow-y:scroll;
+}`]
 })
 export class SkusComponent implements OnInit, OnChanges {
 
   selectedSku: Sku;
-
+  filteredskus = [];
+  allskus = [];
   constructor(private skuService: SkusService) {
     this._selectedRow = new InputRow();
 
@@ -29,14 +35,16 @@ export class SkusComponent implements OnInit, OnChanges {
     if ((row !== null) && (row.region != this._selectedRow.region)) {
       // update skus
       console.log('updating skus');
-      this.skus = [];
+      this.allskus = [];
+      this.filteredskus = [];
       if ((row !== null) && (row.region != null)) {
         this.skuService.getSkus(row.region)
         .pipe(
           catchError(this.handleError)
         )
         .subscribe(skus => {
-          this.skus = skus;
+          this.allskus = skus;
+          this.filteredskus = skus;
         });
       }
     }
@@ -55,11 +63,7 @@ export class SkusComponent implements OnInit, OnChanges {
       }
     }
   }
-  skus = [
-    { id: 1, name: 'sku1'},
-    { id: 2, name: 'sku2'},
-    { id: 3, name: 'sku3'}
- ];
+ 
 
 
 
@@ -72,7 +76,17 @@ export class SkusComponent implements OnInit, OnChanges {
     this.updateSku.emit(sku);
   }
  
+  onKey(skuFilter: string): void {
+    console.log(skuFilter);
+    // update skus list
+    this.filteredskus = this.allskus.filter((x:Sku) => x.name.includes(skuFilter));
+  }
 
+  onEnter(skuFilter: string): void {
+    if (this.filteredskus.length == 1) {
+      this.updateSku.emit(this.filteredskus[0]);
+    }
+  }
   private handleError(error: HttpErrorResponse) {
     if (error.error instanceof ErrorEvent) {
       // A client-side or network error occurred. Handle it accordingly.
@@ -92,9 +106,14 @@ export class SkusComponent implements OnInit, OnChanges {
   
 }
 
+@Component({
+  selector: 'sku',
+  template: `<div class="ms-Grid-col ms-sm1 ms-md1 ms-lg1" style='cursor: pointer;'>{{name}}</div>`,
+  styles: [style + '']
+})
+export class SkuComponent {
+  @Input() id: string;
+  @Input() name: string;
+}
 
-/*
-Copyright 2017-2018 Google Inc. All Rights Reserved.
-Use of this source code is governed by an MIT-style license that
-can be found in the LICENSE file at http://angular.io/license
-*/
+
