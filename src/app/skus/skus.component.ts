@@ -10,7 +10,12 @@ import { ErrorObservable } from 'rxjs/observable/ErrorObservable';
 @Component({
   selector: 'app-skus',
   template,
-  styles: [style + '']
+  
+  styles: [`.skulist {
+    height:200px;
+    overflow:hidden;
+    overflow-y:scroll;
+}`]
 })
 export class SkusComponent implements OnInit, OnChanges {
 

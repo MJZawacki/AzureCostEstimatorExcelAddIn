@@ -1,9 +1,11 @@
 <input #skufilter (keyup)="onKey(skufilter.value)" (keyup.enter)="onEnter(skufilter.value)">
-<div class="ms-Grid" dir="ltr" >
-  <div class="ms-Grid-row" *ngFor="let sku of filteredskus"
-  [class.selected]="sku === selectedSku"
-  (click)="onSelect(sku)">
-      <sku [id]="sku.id" [name]="sku.name"></sku>
+<div class='skulist'>
+  <div class="ms-Grid" dir="ltr" >
+    <div class="ms-Grid-row" *ngFor="let sku of filteredskus"
+    [class.selected]="sku === selectedSku"
+    (click)="onSelect(sku)">
+        <sku [id]="sku.id" [name]="sku.name"></sku>
+    </div>
   </div>
 </div>
 <!-- <ul class="skus">
