@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild, AfterViewInit } from '@angular/core';
 import * as OfficeHelpers from '@microsoft/office-js-helpers';
 import { Sku, SkusService } from './costs/skus.service';
+import { InputRow } from './InputRow/InputRow.component'
 const template = require('./app.component.html');
 
 @Component({
@@ -8,12 +9,21 @@ const template = require('./app.component.html');
     template
 })
 
-export default class AppComponent {
-    constructor(private skuService: SkusService) { }
+export default class AppComponent implements AfterViewInit {
+    constructor(private skuService: SkusService) 
+    { 
+        this.inputRow.region = 'eastus';
+        this.inputRow.sku = 'V8'
+    }
 
     welcomeMessage = 'Welcome';
+    // @ViewChild(InputRow) inputRow: InputRow;
+    public inputRow: InputRow = new InputRow();
 
-
+    ngAfterViewInit() {
+        console.log('Values on ngAfterViewInit():');
+        console.log("inputRow:", this.inputRow);
+      }  
 
     async run() {
         try {
@@ -244,6 +254,8 @@ export default class AppComponent {
     }
 
     async onSelectionChange(args) {
+
+        
         await Excel.run(async (context) => {
         console.log("Handler for table onSelectionChanged event has been triggered. The new selection is: " 
             + args.address + " " + args.tableId);
@@ -262,14 +274,12 @@ export default class AppComponent {
         let region = regionRange.values[selectedindex][0];
         let selectedaddress = skuRange.address.split('!')[1];
         console.log(selectedaddress[0] == args.address[0]);
-        // if (selectedaddress[0] == args.address[0]) {
-        //     // change list in UI
-        //     this.skuService.getSkus(region)
-        //     .subscribe(skus => this.skus = skus);
-        // } else {
-        //     this.skus = [];
-        // }
+        if (selectedaddress[0] == args.address[0]) {
+            // change list in UI
+            let thisregion = region;
+
+        }
         });
-    
+       
     }
 }

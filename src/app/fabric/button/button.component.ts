@@ -10,7 +10,10 @@ const template = require('./button.component.html');
 @Component({
     selector: 'sc-button',
     template,
-    styleUrls: ['./button.component.css']
+    styles: [`.button-spacer {
+      margin-top: 30px;
+      margin-bottom: 30px;
+    }`]
 })
 export class ButtonComponent {
      
