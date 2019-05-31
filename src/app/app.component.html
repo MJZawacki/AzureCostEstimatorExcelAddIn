@@ -1,31 +1,18 @@
-<header class="ms-welcome__header ms-bgColor-neutralLighter ms-u-fadeIn500">
+<!-- <header class="ms-welcome__header ms-bgColor-neutralLighter ms-u-fadeIn500">
     <img width="90" height="90" src="../../assets/logo-filled.png" alt="rate-card-angular" title="rate-card-angular" />
-    <h1 class="ms-fontSize-su ms-fontWeight-light ms-fontColor-neutralPrimary">{{welcomeMessage}}</h1>
-</header>
+</header> -->
 <main class="ms-welcome__main">
-    <h2 class="ms-font-xl ms-fontWeight-semilight ms-fontColor-neutralPrimary ms-u-slideUpIn20"> Discover what rate-card-angular can do for you today! </h2>
-    <ul class="ms-List ms-welcome__features ms-u-slideUpIn10">
-        <li class="ms-ListItem">
-            <i class="ms-Icon ms-Icon--Ribbon"></i>
-            <span class="ms-font-m ms-fontColor-neutralPrimary">Achieve more with Office integration</span>
-        </li>
-        <li class="ms-ListItem">
-            <i class="ms-Icon ms-Icon--Unlock"></i>
-            <span class="ms-font-m ms-fontColor-neutralPrimary">Unlock features and functionality</span>
-        </li>
-        <li class="ms-ListItem">
-            <i class="ms-Icon ms-Icon--Design"></i>
-            <span class="ms-font-m ms-fontColor-neutralPrimary">Create and visualize like a pro</span>
-        </li>
-    </ul>
-    <br />
-    <app-skus [selectedRow]="inputRow" (updateSku)='updateSku($event)'></app-skus>
-    <!-- <inputrow #inputRow></inputrow> -->
+
+   
     
-    <br />
-    <p class="ms-font-l">Modify the source files, then click <b>Run</b>.</p>
-        <sc-button [buttonlabel]="'Create Table'" (click)='createTable()'></sc-button>
-        <sc-button [buttonlabel]="'Add Rows'" (click)='addRow()'></sc-button>
-        <sc-button [buttonlabel]="'Calculate Costs'" (click)='addCostColumns()'></sc-button>
-    
+   
+   
+    <div class="ms-Grid" dir="ltr">
+            <div class="ms-Grid-row">
+                    <div class="ms-Grid-col ms-sm4 ms-md4 ms-lg4"><sc-button [buttonlabel]="'Create Table'" (click)='createTable()'></sc-button></div>
+                    <div class="ms-Grid-col ms-sm4 ms-md4 ms-lg4"><sc-button [buttonlabel]="'Add Rows'" (click)='addRow()'></sc-button></div>
+                    <div class="ms-Grid-col ms-sm4 ms-md4 ms-lg4"><sc-button [buttonlabel]="'Calculate Costs'" (click)='addCostColumns()'></sc-button></div>
+            </div>
+          </div>
+          <app-skus [selectedRow]="inputRow" (updateSku)='updateSku($event)'></app-skus>
 </main>
