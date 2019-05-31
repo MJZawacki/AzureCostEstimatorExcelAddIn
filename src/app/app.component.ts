@@ -1,22 +1,20 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import * as OfficeHelpers from '@microsoft/office-js-helpers';
 import { Sku, SkusService } from './costs/skus.service';
 const template = require('./app.component.html');
-
+import { Observable } from 'rxjs';
 @Component({
     selector: 'app-home',
     template
 })
 
-export default class AppComponent {
-    constructor(private skuService: SkusService) { }
-
-    welcomeMessage = 'Welcome';
-
-
-
-    async run() {
+export default class AppComponent implements OnInit {
+   
+   
+    async ngOnInit(): Promise<void> {
+    
         try {
+
             await Excel.run(async context => {
                 /**
                  * Insert your Excel code here
@@ -37,6 +35,13 @@ export default class AppComponent {
             OfficeHelpers.Utilities.log(error);
         }
     }
+    constructor(private skuService: SkusService) {
+        
+     }
+
+    welcomeMessage = 'Welcome';
+
+
 
     
     async  addRow() {
@@ -221,8 +226,33 @@ export default class AppComponent {
             ["eastus", "Standard_A8_v2", "vm", "normal", "Windows", 1],
             ["eastus", "Standard_A8_v2", "vm", "normal", "Windows", 1]
         ]);
-        expensesTable.onSelectionChanged.add(this.onSelectionChange);
-    
+
+        const skuRange = expensesTable.columns
+        .getItem("Sku Name")
+        .getDataBodyRange().load();
+        const skuBinding = context.workbook.bindings.add(skuRange, "Range", "Skus");
+
+        const skuSelections = Observable.fromEventPattern(
+            async function addHandler(handler) {
+                await Excel.run(async (context) => {
+                    skuBinding.onSelectionChanged.add(handler as (args: Excel.BindingSelectionChangedEventArgs) => Promise<any>);
+                    context.sync();
+                });
+          
+            },
+            async function removeHandler(handler) {
+                await Excel.run(async (context) => {
+                    skuBinding.onSelectionChanged.remove(handler as (args: Excel.BindingSelectionChangedEventArgs) => Promise<any>);
+                    context.sync();
+                });
+            }
+        );
+           
+            //skuSelections.subscribe(x => console.log(x));
+            skuSelections.subscribe(args => this.onSelectionChange(args));
+            //skuBinding.onSelectionChanged.add(this.onSelectionChange);
+        
+          
         if (Office.context.requirements.isSetSupported("ExcelApi", 1.2)) {
             sheet.getUsedRange().format.autofitColumns();
             sheet.getUsedRange().format.autofitRows();
@@ -244,6 +274,7 @@ export default class AppComponent {
     }
 
     async onSelectionChange(args) {
+        console.log(args);
         await Excel.run(async (context) => {
         console.log("Handler for table onSelectionChanged event has been triggered. The new selection is: " 
             + args.address + " " + args.tableId);
@@ -258,10 +289,9 @@ export default class AppComponent {
         .getItem("Sku Name")
         .getDataBodyRange().load();
         await context.sync();
-        let selectedindex = skuRange.rowIndex;
+        let selectedindex = args.startRow;
         let region = regionRange.values[selectedindex][0];
-        let selectedaddress = skuRange.address.split('!')[1];
-        console.log(selectedaddress[0] == args.address[0]);
+        console.log(region);
         // if (selectedaddress[0] == args.address[0]) {
         //     // change list in UI
         //     this.skuService.getSkus(region)
