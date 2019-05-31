@@ -1,4 +1,4 @@
-import { Component, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, ViewChild, AfterViewInit, NgZone } from '@angular/core';
 //import { Component, OnInit } from '@angular/core';
 import * as OfficeHelpers from '@microsoft/office-js-helpers';
 import { Sku, SkusService } from './costs/skus.service';
@@ -12,24 +12,16 @@ import { Observable } from 'rxjs';
 
 
 export default class AppComponent implements AfterViewInit {
-    constructor(private skuService: SkusService)
+    constructor(private skuService: SkusService, private _ngZone: NgZone)
     {
         this.inputRow.region = 'eastus';
         this.inputRow.sku = 'V8'
     }
 
     welcomeMessage = 'Welcome';
+    selectedIndex;
     // @ViewChild(InputRow) inputRow: InputRow;
-    public inputRow: InputRow = new InputRow();
-
-    // ngAfterViewInit() {
-    //     console.log('Values on ngAfterViewInit():');
-    //     console.log("inputRow:", this.inputRow);
-    //   }
-
-
-//export default class AppComponent implements OnInit {
-
+    inputRow: InputRow = new InputRow();
 
     async ngAfterViewInit(): Promise<void> {
 
@@ -68,7 +60,7 @@ export default class AppComponent implements AfterViewInit {
 
                 skuSelections.subscribe(args => this.onSelectionChange(args));
 
-
+                // check to see if sku name is selected and update skulist
 
                 if (Office.context.requirements.isSetSupported("ExcelApi", 1.2)) {
                     sheet.getUsedRange().format.autofitColumns();
@@ -317,9 +309,30 @@ export default class AppComponent implements AfterViewInit {
         }
     }
 
+    async updateSku(sku) {
+        console.log(`updating ${sku}`);
+        var selectedIndex = this.selectedIndex;
+        Excel.run(async function(context) {
+
+      
+            
+            const range = context.workbook.getSelectedRange();
+            range.load("address");
+
+            await context.sync();
+            range.values = [[ sku.name ]];
+           
+            await context.sync();
+            
+            //skuRange.values = [[ sku.name ]];
+            // console.log(`The address of the selected range is "${range.address}"`);
+        });
+    }
+
     async onSelectionChange(args) {
         console.log(args);
-        await Excel.run(async (context) => {
+        var nextInput = new InputRow();
+        var response = await Excel.run(async function (context) {
         console.log("Handler for table onSelectionChanged event has been triggered. The new selection is: "
             + args.address + " " + args.tableId);
         const sheet = context.workbook.worksheets.getItem("Cost Model");
@@ -329,18 +342,16 @@ export default class AppComponent implements AfterViewInit {
         .getItem("Region")
         .getDataBodyRange().load();
 
-        const skuRange = expensesTable.columns
-        .getItem("Sku Name")
-        .getDataBodyRange().load();
         await context.sync();
         let selectedindex = args.startRow;
         let region = regionRange.values[selectedindex][0];
-            // change list in UI
-            //let thisregion = region;
-            return region;
-        }).then(function(region) {
-            console.log(region);
-        });
 
+            return { region: region, selectedIndex: selectedindex };
+        });
+        this._ngZone.run(() => {
+            nextInput.region = response.region;
+            this.selectedIndex = response.selectedIndex;
+            this.inputRow = nextInput;
+        })
     }
 }

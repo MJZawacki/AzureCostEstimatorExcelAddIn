@@ -1,4 +1,4 @@
-<h2>My Skus</h2>
+<h2>{{ selectedRow.region }}</h2>
 <ul class="skus">
   <li *ngFor="let sku of skus"
     [class.selected]="sku === selectedSku"

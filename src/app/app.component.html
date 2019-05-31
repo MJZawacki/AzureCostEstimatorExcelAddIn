@@ -19,7 +19,7 @@
         </li>
     </ul>
     <br />
-    <app-skus [selectedRow]="inputRow"></app-skus>
+    <app-skus [selectedRow]="inputRow" (updateSku)='updateSku($event)'></app-skus>
     <!-- <inputrow #inputRow></inputrow> -->
     
     <br />
