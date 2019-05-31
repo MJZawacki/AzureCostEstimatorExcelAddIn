@@ -1,17 +1,19 @@
 import { Component, ViewChild, AfterViewInit } from '@angular/core';
+//import { Component, OnInit } from '@angular/core';
 import * as OfficeHelpers from '@microsoft/office-js-helpers';
 import { Sku, SkusService } from './costs/skus.service';
 import { InputRow } from './InputRow/InputRow.component'
 const template = require('./app.component.html');
-
+import { Observable } from 'rxjs';
 @Component({
     selector: 'app-home',
     template
 })
 
+
 export default class AppComponent implements AfterViewInit {
-    constructor(private skuService: SkusService) 
-    { 
+    constructor(private skuService: SkusService)
+    {
         this.inputRow.region = 'eastus';
         this.inputRow.sku = 'V8'
     }
@@ -20,27 +22,62 @@ export default class AppComponent implements AfterViewInit {
     // @ViewChild(InputRow) inputRow: InputRow;
     public inputRow: InputRow = new InputRow();
 
-    ngAfterViewInit() {
-        console.log('Values on ngAfterViewInit():');
-        console.log("inputRow:", this.inputRow);
-      }  
+    // ngAfterViewInit() {
+    //     console.log('Values on ngAfterViewInit():');
+    //     console.log("inputRow:", this.inputRow);
+    //   }
 
-    async run() {
+
+//export default class AppComponent implements OnInit {
+
+
+    async ngAfterViewInit(): Promise<void> {
+
+
         try {
+
             await Excel.run(async context => {
-                /**
-                 * Insert your Excel code here
-                 */
-                const range = context.workbook.getSelectedRange();
 
-                // Read the range address
-                range.load('address');
 
-                // Update the fill color
-                range.format.fill.color = 'yellow';
+                const sheet = context.workbook.worksheets.getItem("Cost Model");
+                var expensesTable = context.workbook.tables.getItem("ExpensesTable");
+
+
+
+                const skuRange = expensesTable.columns
+                .getItem("Sku Name")
+                .getDataBodyRange().load();
+                const skuBinding = context.workbook.bindings.add(skuRange, "Range", "Skus");
+
+                const skuSelections = Observable.fromEventPattern(
+                    async function addHandler(handler) {
+                        await Excel.run(async (context) => {
+                            skuBinding.onSelectionChanged.add(handler as (args: Excel.BindingSelectionChangedEventArgs) => Promise<any>);
+                            context.sync();
+                        });
+
+                    },
+                    async function removeHandler(handler) {
+                        await Excel.run(async (context) => {
+                            skuBinding.onSelectionChanged.remove(handler as (args: Excel.BindingSelectionChangedEventArgs) => Promise<any>);
+                            context.sync();
+                        });
+                    }
+                );
+
+
+                skuSelections.subscribe(args => this.onSelectionChange(args));
+
+
+
+                if (Office.context.requirements.isSetSupported("ExcelApi", 1.2)) {
+                    sheet.getUsedRange().format.autofitColumns();
+                    sheet.getUsedRange().format.autofitRows();
+                }
+
 
                 await context.sync();
-                console.log(`The range address was ${range.address}.`);
+
                 });
         } catch (error) {
             OfficeHelpers.UI.notify(error);
@@ -48,15 +85,17 @@ export default class AppComponent implements AfterViewInit {
         }
     }
 
-    
+
+
+
     async  addRow() {
         await Excel.run(async (context) => {
-        const sheet = context.workbook.worksheets.getItem("Sample");
+        const sheet = context.workbook.worksheets.getItem("Cost Model");
         const expensesTable = sheet.tables.getItem("ExpensesTable");
         // check # of columns & Headers
         const headerRange = expensesTable.getHeaderRowRange().load("values");
         const bodyRange = expensesTable.getDataBodyRange().load("values");
-    
+
         await sheet.context.sync();
         const columns = headerRange.values;
         const colcount = columns[0].length;
@@ -89,22 +128,22 @@ export default class AppComponent implements AfterViewInit {
         expensesTable.rows.add(null, [
             newrow
         ]);
-    
+
         sheet.getUsedRange().format.autofitColumns();
         sheet.getUsedRange().format.autofitRows();
-    
+
         await context.sync();
         });
     }
-    
+
     async  addCostColumns() {
         await Excel.run(async (context) => {
-        const sheet = context.workbook.worksheets.getItem("Sample");
+        const sheet = context.workbook.worksheets.getItem("Cost Model");
         const expensesTable = sheet.tables.getItem("ExpensesTable");
-    
+
         const headerRange = expensesTable.getHeaderRowRange().load("values");
         const bodyRange = expensesTable.getDataBodyRange().load("values");
-    
+
         var columns = expensesTable.columns.load();
         await sheet.context.sync();
         for (var i in columns.items) {
@@ -119,10 +158,10 @@ export default class AppComponent implements AfterViewInit {
             break;
             }
         }
-    
-        
-        
-    
+
+
+
+
         // TODO fix if additional columns are added
         const regionRange = expensesTable.columns
         .getItem("Region")
@@ -148,11 +187,11 @@ export default class AppComponent implements AfterViewInit {
         .getItem("Quantity")
         .getDataBodyRange()
         .load("values");
-    
+
         await sheet.context.sync();
-    
+
         const rows = bodyRange.values;
-    
+
         const regions = regionRange.values;
         const skus = skuRange.values;
         const types = typeRange.values;
@@ -171,78 +210,103 @@ export default class AppComponent implements AfterViewInit {
                         for (var i in rows ) {
                             newcolumn.push([costs[i].monthlycost]);
                         }
-                    
-                    
-                    
+
+
+
                         expensesTable.columns.add(null, newcolumn);
                         //expensesTable.columns.add(null, [["Base Cost"], ["Yes"], ["Yes"], ["No"], ["No"], ["Yes"], ["Yes"]]);
-                        
+
                         sheet.getUsedRange().format.autofitColumns();
                         sheet.getUsedRange().format.autofitRows();
-                    
+
                         await context.sync();
                         await this.addCalculatedColumn();
                     })
-        
-    
+
+
         });
     }
 
-    
-    
+
+
     async addCalculatedColumn() {
         await Excel.run(async (context) => {
-        const sheet = context.workbook.worksheets.getItem("Sample");
+        const sheet = context.workbook.worksheets.getItem("Cost Model");
         const expensesTable = sheet.tables.getItem("ExpensesTable");
-    
+
         const headerRange = expensesTable.getHeaderRowRange().load("values");
         const bodyRange = expensesTable.getDataBodyRange().load("values");
-    
+
         await sheet.context.sync();
         const rowcount = bodyRange.values;
-    
+
         const annualcostFormula = '=[@Monthly Cost] * 12'
         let newcolumn = [["Annual Cost"]];
         for (var i in rowcount ) {
             newcolumn.push([annualcostFormula]);
         }
-    
+
         expensesTable.columns.add(null, newcolumn);
-    
+
         sheet.getUsedRange().format.autofitColumns();
         sheet.getUsedRange().format.autofitRows();
-    
+
         await context.sync();
         });
     }
-    
+
     /** Create a new table with sample data */
     async createTable() {
         await Excel.run(async (context) => {
-        await OfficeHelpers.ExcelUtilities.forceCreateSheet(context.workbook, "Sample");
-    
-        const sheet = context.workbook.worksheets.getItem("Sample");
+        await OfficeHelpers.ExcelUtilities.forceCreateSheet(context.workbook, "Cost Model");
+
+        const sheet = context.workbook.worksheets.getItem("Cost Model");
         const expensesTable = sheet.tables.add("A1:F1", true /*hasHeaders*/);
         expensesTable.name = "ExpensesTable";
         expensesTable.getHeaderRowRange().values = [["Region", "Sku Name", "Type", "Priority", "OS", "Quantity"]];
-    
+
         expensesTable.rows.add(null /*add at the end*/, [
             ["eastus", "Standard_A8_v2", "vm", "normal", "Windows", 1],
             ["eastus", "Standard_A8_v2", "vm", "normal", "Windows", 1],
             ["eastus", "Standard_A8_v2", "vm", "normal", "Windows", 1]
         ]);
-        expensesTable.onSelectionChanged.add(this.onSelectionChange);
-    
+
+        const skuRange = expensesTable.columns
+        .getItem("Sku Name")
+        .getDataBodyRange().load();
+        const skuBinding = context.workbook.bindings.add(skuRange, "Range", "Skus");
+
+        const skuSelections = Observable.fromEventPattern(
+            async function addHandler(handler) {
+                await Excel.run(async (context) => {
+                    skuBinding.onSelectionChanged.add(handler as (args: Excel.BindingSelectionChangedEventArgs) => Promise<any>);
+                    context.sync();
+                });
+
+            },
+            async function removeHandler(handler) {
+                await Excel.run(async (context) => {
+                    skuBinding.onSelectionChanged.remove(handler as (args: Excel.BindingSelectionChangedEventArgs) => Promise<any>);
+                    context.sync();
+                });
+            }
+        );
+
+            //skuSelections.subscribe(x => console.log(x));
+            skuSelections.subscribe(args => this.onSelectionChange(args));
+            //skuBinding.onSelectionChanged.add(this.onSelectionChange);
+
+
         if (Office.context.requirements.isSetSupported("ExcelApi", 1.2)) {
             sheet.getUsedRange().format.autofitColumns();
             sheet.getUsedRange().format.autofitRows();
         }
-    
+
         sheet.activate();
         await context.sync();
         });
     }
-    
+
     /** Default helper for invoking an action and handling errors. */
     async tryCatch(callback) {
         try {
@@ -254,32 +318,29 @@ export default class AppComponent implements AfterViewInit {
     }
 
     async onSelectionChange(args) {
-
-        
+        console.log(args);
         await Excel.run(async (context) => {
-        console.log("Handler for table onSelectionChanged event has been triggered. The new selection is: " 
+        console.log("Handler for table onSelectionChanged event has been triggered. The new selection is: "
             + args.address + " " + args.tableId);
-        const sheet = context.workbook.worksheets.getItem("Sample");
+        const sheet = context.workbook.worksheets.getItem("Cost Model");
         const expensesTable = sheet.tables.getItem("ExpensesTable");
-    
+
         const regionRange = expensesTable.columns
         .getItem("Region")
         .getDataBodyRange().load();
-    
+
         const skuRange = expensesTable.columns
         .getItem("Sku Name")
         .getDataBodyRange().load();
         await context.sync();
-        let selectedindex = skuRange.rowIndex;
+        let selectedindex = args.startRow;
         let region = regionRange.values[selectedindex][0];
-        let selectedaddress = skuRange.address.split('!')[1];
-        console.log(selectedaddress[0] == args.address[0]);
-        if (selectedaddress[0] == args.address[0]) {
             // change list in UI
-            let thisregion = region;
-
-        }
+            //let thisregion = region;
+            return region;
+        }).then(function(region) {
+            console.log(region);
         });
-       
+
     }
 }
