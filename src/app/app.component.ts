@@ -1,17 +1,25 @@
-import { Component, ViewChild, AfterViewInit, NgZone } from '@angular/core';
-//import { Component, OnInit } from '@angular/core';
+import { Component, ViewChild, AfterViewInit, NgZone, Directive } from '@angular/core';
 import * as OfficeHelpers from '@microsoft/office-js-helpers';
 import { Sku, SkusService } from './costs/skus.service';
 import { InputRow } from './InputRow/InputRow.component'
 const template = require('./app.component.html');
 import { Observable } from 'rxjs';
+import { fromEvent, fromEventPattern } from 'rxjs'
 @Component({
     selector: 'app-home',
-    template
+    template,
+    styles: [`.example-icon {
+        padding: 0 14px;
+      }
+      
+      .example-spacer {
+        flex: 1 1 auto;
+      }`]
 })
 
 
 export default class AppComponent implements AfterViewInit {
+
     constructor(private skuService: SkusService, private _ngZone: NgZone)
     {
         this.inputRow.region = 'eastus';
@@ -41,8 +49,8 @@ export default class AppComponent implements AfterViewInit {
                 .getItem("Sku Name")
                 .getDataBodyRange().load();
                 const skuBinding = context.workbook.bindings.add(skuRange, "Range", "Skus");
-
-                const skuSelections = Observable.fromEventPattern(
+                
+                const skuSelections = fromEventPattern(
                     async function addHandler(handler) {
                         await Excel.run(async (context) => {
                             skuBinding.onSelectionChanged.add(handler as (args: Excel.BindingSelectionChangedEventArgs) => Promise<any>);
@@ -276,7 +284,7 @@ export default class AppComponent implements AfterViewInit {
         .getDataBodyRange().load();
         const skuBinding = context.workbook.bindings.add(skuRange, "Range", "Skus");
 
-        const skuSelections = Observable.fromEventPattern(
+        const skuSelections = fromEventPattern(
             async function addHandler(handler) {
                 await Excel.run(async (context) => {
                     skuBinding.onSelectionChanged.add(handler as (args: Excel.BindingSelectionChangedEventArgs) => Promise<any>);

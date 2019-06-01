@@ -5,17 +5,29 @@ import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http
 const template = require('./skus.component.html');
 const style = require('./skus.component.css');
 import { catchError, retry, map } from 'rxjs/operators';
-import { ErrorObservable } from 'rxjs/observable/ErrorObservable';
+import { throwError } from 'rxjs';
 
 @Component({
   selector: 'app-skus',
   template,
   
   styles: [`.skulist {
-    height:200px;
+    height:300pt;
+
     overflow:hidden;
     overflow-y:scroll;
-}`]
+}
+
+.example-form {
+  min-width: 150px;
+  max-width: 500px;
+  width: 100%;
+}
+
+.example-full-width {
+  width: 100%;
+}
+`]
 })
 export class SkusComponent implements OnInit, OnChanges {
 
@@ -99,7 +111,7 @@ export class SkusComponent implements OnInit, OnChanges {
         `body was: ${error.error}`);
     }
     // return an observable with a user-facing error message
-    return new ErrorObservable(
+    return throwError(
       'Something bad happened; please try again later.');
   };
 

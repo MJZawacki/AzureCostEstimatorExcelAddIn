@@ -1,12 +1,22 @@
-<input #skufilter (keyup)="onKey(skufilter.value)" (keyup.enter)="onEnter(skufilter.value)">
+<!-- <input #skufilter (keyup)="onKey(skufilter.value)" (keyup.enter)="onEnter(skufilter.value)"> -->
+<form class="example-form">
+<mat-form-field class="example-full-width">
+    <input #skufilter  (keyup)="onKey(skufilter.value)" (keyup.enter)="onEnter(skufilter.value)" matInput placeholder="Sku Name" value="">
+</mat-form-field>
+</form>
 <div class='skulist'>
-  <div class="ms-Grid" dir="ltr" >
+    <mat-list dense>
+        <mat-list-item  *ngFor="let sku of filteredskus"
+        [class.selected]="sku === selectedSku"
+        (click)="onSelect(sku)"><sku [id]="sku.id" [name]="sku.name"></sku></mat-list-item>
+       </mat-list>
+  <!-- <div class="ms-Grid" dir="ltr" >
     <div class="ms-Grid-row" *ngFor="let sku of filteredskus"
     [class.selected]="sku === selectedSku"
     (click)="onSelect(sku)">
         <sku [id]="sku.id" [name]="sku.name"></sku>
     </div>
-  </div>
+  </div> -->
 </div>
 <!-- <ul class="skus">
   <li *ngFor="let sku of filteredskus"
