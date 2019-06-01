@@ -31,10 +31,11 @@ export default class AppComponent implements AfterViewInit {
             await Excel.run(async context => {
 
 
-                const sheet = context.workbook.worksheets.getItem("Cost Model");
+                const sheet = context.workbook.worksheets.getItemOrNullObject("Cost Model");
+
+        
+
                 var expensesTable = context.workbook.tables.getItem("ExpensesTable");
-
-
 
                 const skuRange = expensesTable.columns
                 .getItem("Sku Name")
@@ -70,10 +71,17 @@ export default class AppComponent implements AfterViewInit {
 
                 await context.sync();
 
+                
+
                 });
         } catch (error) {
-            OfficeHelpers.UI.notify(error);
-            OfficeHelpers.Utilities.log(error);
+            if (error.code != "ItemNotFound") { 
+                OfficeHelpers.UI.notify(error);
+                OfficeHelpers.Utilities.log(error);
+
+            }
+
+            
         }
     }
 
