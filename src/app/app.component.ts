@@ -83,7 +83,7 @@ export default class AppComponent implements AfterViewInit {
                     sheet.getUsedRange().format.autofitRows();
                 }
 
-                // TODO check selection and update skulist component if a sku is currently selected
+         
                 var selectedRange = context.workbook.getSelectedRange().load(["address", "rowIndex"]);
                 const selectionTest = skuRange.getIntersectionOrNullObject(selectedRange).load("address");
                 await context.sync();
@@ -158,8 +158,96 @@ export default class AppComponent implements AfterViewInit {
         });
     }
 
+    async  addCostColumns() {
+            try {
+    
+                await Excel.run(async (context) => {
+                const sheet = context.workbook.worksheets.getItem("Cost Model");
+     
+                const expensesTable = sheet.tables.getItem("ExpensesTable");
+    
+                const headerRange = expensesTable.getHeaderRowRange().load("values");
+                const bodyRange = expensesTable.getDataBodyRange().load("values");
+    
+                var columns = expensesTable.columns.load();
+                await sheet.context.sync();
 
-    async updateColumns(costs: any[]) {
+
+                const regionRange = expensesTable.columns
+                .getItem("Region")
+                .getDataBodyRange()
+                .load("values");
+                const skuRange = expensesTable.columns
+                .getItem("Sku Name")
+                .getDataBodyRange()
+                .load("values");
+                const typeRange = expensesTable.columns
+                .getItem("Type")
+                .getDataBodyRange()
+                .load("values");
+                const priorityRange = expensesTable.columns
+                .getItem("Priority")
+                .getDataBodyRange()
+                .load("values");
+                const osRange = expensesTable.columns
+                .getItem("OS")
+                .getDataBodyRange()
+                .load("values");
+                const quantityRange = expensesTable.columns
+                .getItem("Quantity")
+                .getDataBodyRange()
+                .load("values");
+    
+                await sheet.context.sync();
+    
+                const rows = bodyRange.values;
+    
+                const regions = regionRange.values;
+                const skus = skuRange.values;
+                const types = typeRange.values;
+                const priorities = priorityRange.values;
+                const osvalues = osRange.values;
+                const quantities = quantityRange.values;
+                await this.skuService.calculateCosts(regions,skus,types,priorities,osvalues,quantities)
+                            .subscribe(async costs => {
+    
+                                //let newcolumn = [["Monthly Cost"]];
+                                // for (var i=0; i< rowcount; i++ ) {
+                                //   newcolumn.push(["1"]);
+                                // }
+                                // need to load first
+                                // assert output is 1+rowcount.length
+                                //for (var i in rows ) {
+                                //    newcolumn.push([costs[i].monthlycost]);
+                                //}
+    
+    
+    
+                                //expensesTable.columns.add(null, newcolumn);
+                                //expensesTable.columns.add(null, [["Base Cost"], ["Yes"], ["Yes"], ["No"], ["No"], ["Yes"], ["Yes"]]);
+    
+                                sheet.getUsedRange().format.autofitColumns();
+                                sheet.getUsedRange().format.autofitRows();
+    
+                                await context.sync();
+                                var monthlycosts = costs.map((x) => x.monthlycost);
+                                await this.updateCostColumns(monthlycosts);
+                     
+                            })
+    
+    
+                });
+            }
+            catch (error) {
+                if (error.code != "ItemNotFound") {
+                    OfficeHelpers.UI.notify(error);
+                    OfficeHelpers.Utilities.log(error);
+    
+                }
+            }
+        }
+
+    async updateCostColumns(costs: any[]) {
         try {
             return Excel.run(async (context) => {
     
@@ -207,7 +295,8 @@ export default class AppComponent implements AfterViewInit {
         }
     }
 
-   
+    // TODO change selection handler back to worksheet and test for sku selection - empty list when not selected
+
     /** Create a new table with sample data */
     async createTable() {
         await Excel.run(async (context) => {
@@ -271,6 +360,7 @@ export default class AppComponent implements AfterViewInit {
         }
     }
 
+    // TODO check to see if selection is still on a sku cell
     async updateSku(sku) {
         console.log(`updating ${sku}`);
         var selectedIndex = this.selectedIndex;
