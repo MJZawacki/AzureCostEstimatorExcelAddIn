@@ -5,6 +5,7 @@ import { InputRow } from './InputRow/InputRow.component'
 const template = require('./app.component.html');
 import { Observable } from 'rxjs';
 import { fromEvent, fromEventPattern } from 'rxjs'
+import { MatProgressBar } from '@angular/material';
 @Component({
     selector: 'app-home',
     template,
@@ -14,6 +15,11 @@ import { fromEvent, fromEventPattern } from 'rxjs'
       
       .example-spacer {
         flex: 1 1 auto;
+      }
+      
+      .skulist {
+          width: 100%;
+          height: 100%;
       }`]
 })
 
@@ -22,13 +28,12 @@ export default class AppComponent implements AfterViewInit {
 
     constructor(private skuService: SkusService, private _ngZone: NgZone)
     {
-        this.inputRow.region = 'eastus';
-        this.inputRow.sku = 'V8'
+
     }
 
     welcomeMessage = 'Welcome';
     selectedIndex;
-    // @ViewChild(InputRow) inputRow: InputRow;
+    
     inputRow: InputRow = new InputRow();
 
     async ngAfterViewInit(): Promise<void> {

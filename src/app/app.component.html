@@ -13,6 +13,6 @@
                   <button mat-button><mat-icon class="example-icon" aria-hidden="false" aria-label="Example delete icon" (click)='createTable()'>settings</mat-icon></button>
                 </mat-toolbar-row>
               </mat-toolbar>
-
-          <app-skus [selectedRow]="inputRow" (updateSku)='updateSku($event)'></app-skus>
+              
+          <app-skus class='skulist' [selectedRow]="inputRow" (updateSku)='updateSku($event)'></app-skus>
 </main>

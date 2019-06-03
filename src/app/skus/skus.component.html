@@ -1,4 +1,5 @@
 <!-- <input #skufilter (keyup)="onKey(skufilter.value)" (keyup.enter)="onEnter(skufilter.value)"> -->
+<mat-progress-bar *ngIf="showprogress" mode="indeterminate"></mat-progress-bar>
 <form class="example-form">
 <mat-form-field class="example-full-width">
     <input #skufilter  (keyup)="onKey(skufilter.value)" (keyup.enter)="onEnter(skufilter.value)" matInput placeholder="Sku Name" value="">

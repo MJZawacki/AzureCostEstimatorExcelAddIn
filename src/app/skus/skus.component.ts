@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter, SimpleChange, OnChanges } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, SimpleChange, OnChanges, ViewChild } from '@angular/core';
 import { Sku, SkusService } from '../costs/skus.service';
 import { InputRow } from '../InputRow/InputRow.component';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
@@ -6,6 +6,7 @@ const template = require('./skus.component.html');
 const style = require('./skus.component.css');
 import { catchError, retry, map } from 'rxjs/operators';
 import { throwError } from 'rxjs';
+import { MatProgressBar } from '@angular/material';
 
 @Component({
   selector: 'app-skus',
@@ -31,11 +32,14 @@ import { throwError } from 'rxjs';
 })
 export class SkusComponent implements OnInit, OnChanges {
 
+  @ViewChild(MatProgressBar, { static: true }) progressBar: MatProgressBar;
   selectedSku: Sku;
+  showprogress = false;
   filteredskus = [];
   allskus = [];
   constructor(private skuService: SkusService) {
     this._selectedRow = new InputRow();
+    this.showprogress = false;
 
    }
   private _selectedRow: InputRow;
@@ -50,6 +54,8 @@ export class SkusComponent implements OnInit, OnChanges {
       this.allskus = [];
       this.filteredskus = [];
       if ((row !== null) && (row.region != null)) {
+        console.log(this.progressBar);
+        this.showprogress=true;
         this.skuService.getSkus(row.region)
         .pipe(
           catchError(this.handleError)
@@ -57,6 +63,7 @@ export class SkusComponent implements OnInit, OnChanges {
         .subscribe(skus => {
           this.allskus = skus;
           this.filteredskus = skus;
+          this.showprogress = false;
         });
       }
     }
