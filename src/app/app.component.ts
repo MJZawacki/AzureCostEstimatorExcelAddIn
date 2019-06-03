@@ -83,9 +83,16 @@ export default class AppComponent implements AfterViewInit {
                     sheet.getUsedRange().format.autofitRows();
                 }
 
-
+                // TODO check selection and update skulist component if a sku is currently selected
+                var selectedRange = context.workbook.getSelectedRange().load(["address", "rowIndex"]);
+                const selectionTest = skuRange.getIntersectionOrNullObject(selectedRange).load("address");
                 await context.sync();
+                
+                console.log(selectedRange);
+                if (!selectionTest.isNullObject) {
+                    this.onSelectionChange({ startRow: selectedRange.rowIndex - 1 })
 
+                }
                 
 
                 });
@@ -151,108 +158,6 @@ export default class AppComponent implements AfterViewInit {
         });
     }
 
-    async  addCostColumns() {
-        try {
-
-            await Excel.run(async (context) => {
-            const sheet = context.workbook.worksheets.getItem("Cost Model");
-            const expensesTable = sheet.tables.getItem("ExpensesTable");
-    
-            const headerRange = expensesTable.getHeaderRowRange().load("values");
-            const bodyRange = expensesTable.getDataBodyRange().load("values");
-    
-            var columns = expensesTable.columns.load();
-            await sheet.context.sync();
-            // for (var i in columns.items) {
-            //     switch (columns.items[i].name) {
-            //     case "Monthly Cost":
-            //         var monthlycostcolumn = expensesTable.columns.getItem('Monthly Cost');
-            //         monthlycostcolumn.delete();
-            //     break;
-            //     case "Annual Cost":
-            //         var annualcostcolumn = expensesTable.columns.getItem('Annual Cost');
-            //         annualcostcolumn.delete();
-            //     break;
-            //     }
-            // }
-    
-    
-    
-    
-            // TODO fix if additional columns are added
-            const regionRange = expensesTable.columns
-            .getItem("Region")
-            .getDataBodyRange()
-            .load("values");
-            const skuRange = expensesTable.columns
-            .getItem("Sku Name")
-            .getDataBodyRange()
-            .load("values");
-            const typeRange = expensesTable.columns
-            .getItem("Type")
-            .getDataBodyRange()
-            .load("values");
-            const priorityRange = expensesTable.columns
-            .getItem("Priority")
-            .getDataBodyRange()
-            .load("values");
-            const osRange = expensesTable.columns
-            .getItem("OS")
-            .getDataBodyRange()
-            .load("values");
-            const quantityRange = expensesTable.columns
-            .getItem("Quantity")
-            .getDataBodyRange()
-            .load("values");
-    
-            await sheet.context.sync();
-    
-            const rows = bodyRange.values;
-    
-            const regions = regionRange.values;
-            const skus = skuRange.values;
-            const types = typeRange.values;
-            const priorities = priorityRange.values;
-            const osvalues = osRange.values;
-            const quantities = quantityRange.values;
-            await this.skuService.calculateCosts(regions,skus,types,priorities,osvalues,quantities)
-                        .subscribe(async costs => {
-    
-                            //let newcolumn = [["Monthly Cost"]];
-                            // for (var i=0; i< rowcount; i++ ) {
-                            //   newcolumn.push(["1"]);
-                            // }
-                            // need to load first
-                            // assert output is 1+rowcount.length
-                            //for (var i in rows ) {
-                            //    newcolumn.push([costs[i].monthlycost]);
-                            //}
-    
-    
-    
-                            //expensesTable.columns.add(null, newcolumn);
-                            //expensesTable.columns.add(null, [["Base Cost"], ["Yes"], ["Yes"], ["No"], ["No"], ["Yes"], ["Yes"]]);
-    
-                            sheet.getUsedRange().format.autofitColumns();
-                            sheet.getUsedRange().format.autofitRows();
-    
-                            await context.sync();
-                            var monthlycosts = costs.map((x) => x.monthlycost);
-                            await this.updateColumns(monthlycosts);
-                            await this.addCalculatedColumn();
-                        })
-    
-    
-            });
-        }
-        catch (error) {
-            if (error.code != "ItemNotFound") { 
-                OfficeHelpers.UI.notify(error);
-                OfficeHelpers.Utilities.log(error);
-
-            }
-        }
-    }
 
     async updateColumns(costs: any[]) {
         try {
@@ -302,32 +207,7 @@ export default class AppComponent implements AfterViewInit {
         }
     }
 
-    async addCalculatedColumn() {
-        await Excel.run(async (context) => {
-        const sheet = context.workbook.worksheets.getItem("Cost Model");
-        const expensesTable = sheet.tables.getItem("ExpensesTable");
-
-        const headerRange = expensesTable.getHeaderRowRange().load("values");
-        const bodyRange = expensesTable.getDataBodyRange().load("values");
-
-        await sheet.context.sync();
-        const rowcount = bodyRange.values;
-
-        const annualcostFormula = '=[@Monthly Cost] * 12'
-        let newcolumn = [["Annual Cost"]];
-        for (var i in rowcount ) {
-            newcolumn.push([annualcostFormula]);
-        }
-
-        expensesTable.columns.add(null, newcolumn);
-
-        sheet.getUsedRange().format.autofitColumns();
-        sheet.getUsedRange().format.autofitRows();
-
-        await context.sync();
-        });
-    }
-
+   
     /** Create a new table with sample data */
     async createTable() {
         await Excel.run(async (context) => {
@@ -415,18 +295,17 @@ export default class AppComponent implements AfterViewInit {
         console.log(args);
         var nextInput = new InputRow();
         var response = await Excel.run(async function (context) {
-        console.log("Handler for table onSelectionChanged event has been triggered. The new selection is: "
-            + args.address + " " + args.tableId);
-        const sheet = context.workbook.worksheets.getItem("Cost Model");
-        const expensesTable = sheet.tables.getItem("ExpensesTable");
 
-        const regionRange = expensesTable.columns
-        .getItem("Region")
-        .getDataBodyRange().load();
+            const sheet = context.workbook.worksheets.getItem("Cost Model");
+            const expensesTable = sheet.tables.getItem("ExpensesTable");
 
-        await context.sync();
-        let selectedindex = args.startRow;
-        let region = regionRange.values[selectedindex][0];
+            const regionRange = expensesTable.columns
+            .getItem("Region")
+            .getDataBodyRange().load();
+
+            await context.sync();
+            let selectedindex = args.startRow;
+            let region = regionRange.values[selectedindex][0];
 
             return { region: region, selectedIndex: selectedindex };
         });
