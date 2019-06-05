@@ -13,6 +13,7 @@
             <button mat-button><mat-icon class="example-icon" aria-hidden="false" aria-label="Example delete icon" (click)='createTable()'>settings</mat-icon></button>
           </mat-toolbar-row>
         </mat-toolbar>
-        
-    <app-skus class='skulist' [selectedRow]="inputRow" (updateSku)='updateSku($event)'></app-skus>
+        <mat-progress-bar *ngIf="showProgress" mode="indeterminate"></mat-progress-bar>
+
+    <app-skus class='skulist' [selectedRow]="inputRow" (updateSku)='updateSku($event)' (progressUpdate)='progressUpdate($event)'></app-skus>
 </main>

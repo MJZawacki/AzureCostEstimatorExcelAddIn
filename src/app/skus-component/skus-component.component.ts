@@ -16,12 +16,10 @@ export class SkusComponent implements OnInit {
 
   @ViewChild(MatProgressBar, { static: true }) progressBar: MatProgressBar;
   selectedSku: Sku;
-  showprogress = false;
   filteredskus = [];
   allskus = [];
   constructor(private skuService: SkusService) {
     this._selectedRow = new InputRowComponent();
-    this.showprogress = false;
 
    }
   private _selectedRow: InputRowComponent;
@@ -37,7 +35,7 @@ export class SkusComponent implements OnInit {
       this.filteredskus = [];
       if ((row !== null) && (row.region != null)) {
         console.log(this.progressBar);
-        this.showprogress=true;
+        this.progressUpdate.emit(true);
         this.skuService.getSkus(row.region)
         .pipe(
           catchError(this.handleError)
@@ -45,7 +43,7 @@ export class SkusComponent implements OnInit {
         .subscribe(skus => {
           this.allskus = skus;
           this.filteredskus = skus;
-          this.showprogress = false;
+          this.progressUpdate.emit(false);
         });
       }
     }
@@ -54,6 +52,7 @@ export class SkusComponent implements OnInit {
   } 
 
   @Output() updateSku = new EventEmitter<Sku>();
+  @Output() progressUpdate = new EventEmitter<boolean>();
 
   ngOnChanges(changes: {[propKey: string]: SimpleChange}) {
     let log: string[] = [];
