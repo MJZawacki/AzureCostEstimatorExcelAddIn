@@ -67,7 +67,7 @@ export class SkusService {
 
 
   public getSkus(region : string ) : Observable<Sku[]> {
-    let endpoint : string = `${environment.api_endpoint}/api/cost${region}?${environment.api_code}`;
+    let endpoint : string = `${environment.api_endpoint}/api/cost/${region}?${environment.api_code}`;
         
     return this.http.get<Sku[]>(endpoint,
       {
