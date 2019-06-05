@@ -28,3 +28,9 @@ steps:
     Destination: 'AzureBlob'
     storage: 'mzratecard'
     ContainerName: '$web'
+
+- task: AzureCLI@1
+  inputs:
+    azureSubscription: 'ShareshiftSubscription(8e95e0bb-d7cc-4454-9443-75ca862d34c1)'
+    scriptLocation: 'inlineScript'
+    inlineScript: 'az storage blob upload-batch -s ./dist/CostEstimatorUI -d ''$web'''
