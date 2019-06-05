@@ -2,17 +2,17 @@
     <img width="90" height="90" src="../../assets/logo-filled.png" alt="rate-card-angular" title="rate-card-angular" />
 </header> -->
 <main class="ms-welcome__main">
-        <mat-toolbar color="primary">
+  <mat-toolbar color="primary">
 
-              
-                <mat-toolbar-row>
- 
-                 
-                  <button mat-button><mat-icon class="example-icon" aria-hidden="false" aria-label="Example heart icon" (click)='addRow()'>add</mat-icon></button>
-                  <button mat-button><mat-icon class="example-icon" aria-hidden="false" aria-label="Example delete icon" (click)='addCostColumns()'>attach_money</mat-icon></button>
-                  <button mat-button><mat-icon class="example-icon" aria-hidden="false" aria-label="Example delete icon" (click)='createTable()'>settings</mat-icon></button>
-                </mat-toolbar-row>
-              </mat-toolbar>
-              
-          <app-skus class='skulist' [selectedRow]="inputRow" (updateSku)='updateSku($event)'></app-skus>
+        
+          <mat-toolbar-row>
+
+           
+            <button mat-button><mat-icon class="example-icon" aria-hidden="false" aria-label="Example heart icon" (click)='addRow()'>add</mat-icon></button>
+            <button mat-button><mat-icon class="example-icon" aria-hidden="false" aria-label="Example delete icon" (click)='addCostColumns()'>attach_money</mat-icon></button>
+            <button mat-button><mat-icon class="example-icon" aria-hidden="false" aria-label="Example delete icon" (click)='createTable()'>settings</mat-icon></button>
+          </mat-toolbar-row>
+        </mat-toolbar>
+        
+    <app-skus class='skulist' [selectedRow]="inputRow" (updateSku)='updateSku($event)'></app-skus>
 </main>

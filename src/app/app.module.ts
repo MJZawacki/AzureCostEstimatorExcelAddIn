@@ -1,22 +1,27 @@
-import { NgModule, Type } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
+
+import { AppComponent } from './app.component';
+import { SkusComponent, SkuComponent } from './skus-component/skus-component.component';
+import { InputRowComponent } from './input-row-component/input-row-component.component';
+import { SkusService } from './skus-service.service';
 import { HttpClientModule } from '@angular/common/http';
-import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
-import { SkusService } from './costs/skus.service';
-import AppComponent from './app.component';
-import { SkusComponent, SkuComponent } from './skus/skus.component';
-import { InputRow } from './InputRow/InputRow.component'
-import { ButtonComponent } from './fabric/button/button.component';
+import { MatListModule, MatToolbarModule, MatFormFieldModule, MatInputModule, MatIconModule, MatButtonModule, MatProgressBarModule } from '@angular/material';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import { TooltipModule } from 'ngx-bootstrap/tooltip';
-import {MatButtonModule, MatToolbar, MatToolbarModule, MatIconModule, MatListModule, MatFormFieldModule, MatInputModule, MatProgressBarModule} from '@angular/material';
+
 
 @NgModule({
-  declarations: [AppComponent, SkusComponent, ButtonComponent, 
-    InputRow, SkuComponent],
-  imports: [BrowserModule, HttpClientModule, MatListModule, MatToolbarModule, MatIconModule, MatButtonModule,
+  declarations: [
+    AppComponent,
+    SkusComponent,
+    InputRowComponent,
+    SkuComponent
+  ],
+  imports: [
+    BrowserModule, HttpClientModule, MatListModule, MatToolbarModule, MatIconModule, MatButtonModule,
     TooltipModule.forRoot(), BrowserAnimationsModule, MatFormFieldModule,MatInputModule, MatProgressBarModule],
-  bootstrap: [AppComponent],
-  providers: [SkusService ]
+  providers: [SkusService],
+  bootstrap: [AppComponent]
 })
-export default class AppModule { }
+export class AppModule { }

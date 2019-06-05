@@ -1,0 +1,16 @@
+.skulist {
+    height:300pt;
+
+    overflow:hidden;
+    overflow-y:scroll;
+}
+
+.example-form {
+  min-width: 150px;
+  max-width: 500px;
+  width: 100%;
+}
+
+.example-full-width {
+  width: 100%;
+}
