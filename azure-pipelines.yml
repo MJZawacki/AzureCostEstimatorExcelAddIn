@@ -21,8 +21,7 @@ steps:
     CODE_ENDPOINT: '$(CODE_ENDPOINT)'
   inputs:
     targetType: 'inline'
-    script: 'sed -i "s/ENDPOINT/$ENDPOINT/g" environment.ts;
-      sed -i "s/CODE_ENDPOINT/$CODE_ENDPOINT/g" environment.prod.ts'
+    script: 'sed -i "s/CODE_ENDPOINT/$CODE_ENDPOINT/g" environment.prod.ts; sed -i "s/ENDPOINT/$ENDPOINT/g" environment.ts'
     workingDirectory: './src/environments'
     
 - script: |
