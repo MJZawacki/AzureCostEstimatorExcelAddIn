@@ -23,7 +23,7 @@ steps:
     targetType: 'inline'
     script: 'sed -i "s/ENDPOINT/$ENDPOINT/g" environment.ts
       sed -i "s/CODE_ENDPOINT/$CODE_ENDPOINT/g" environment.prod.ts'
-    workingDirectory: '${Build.StagingDirectory}/src/environments'
+    workingDirectory: './src/environments'
     
 - script: |
     npm install -g @angular/cli
