@@ -203,21 +203,6 @@ export class AppComponent {
             await this.skuService.calculateCosts(regions,skus,types,priorities,osvalues,quantities)
                         .subscribe(async costs => {
 
-                            //let newcolumn = [["Monthly Cost"]];
-                            // for (var i=0; i< rowcount; i++ ) {
-                            //   newcolumn.push(["1"]);
-                            // }
-                            // need to load first
-                            // assert output is 1+rowcount.length
-                            //for (var i in rows ) {
-                            //    newcolumn.push([costs[i].monthlycost]);
-                            //}
-
-
-
-                            //expensesTable.columns.add(null, newcolumn);
-                            //expensesTable.columns.add(null, [["Base Cost"], ["Yes"], ["Yes"], ["No"], ["No"], ["Yes"], ["Yes"]]);
-
                             sheet.getUsedRange().format.autofitColumns();
                             sheet.getUsedRange().format.autofitRows();
 
