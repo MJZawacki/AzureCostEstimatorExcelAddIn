@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http
 import { Observable, throwError } from 'rxjs';
 
 import { catchError, retry, map } from 'rxjs/operators';
+import { environment } from './../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -35,7 +36,7 @@ export class SkusService {
   
   
   public getCosts(input : any ) : Observable<Sku[]> {
-    let endpoint : string = 'https://mzratecardfunc.azurewebsites.net/api/costmodel?code=FGhUffy0jIaVwck4uQ4kdHSTav4RUr3yMUtNIT/fOzyeff/MpeS/Kw=='
+    let endpoint : string = `${environment.api_endpoint}/api/costmodel?${environment.api_code}`;
     return this.http.post<any>(endpoint, 
                 input,
                 {
@@ -66,7 +67,7 @@ export class SkusService {
 
 
   public getSkus(region : string ) : Observable<Sku[]> {
-    let endpoint = 'https://mzratecardfunc.azurewebsites.net/api/cost/' + region + '?code=94PmLQSkKSRctaaIUzaCIL4VB7h7pvraC23NmlukSwJkVze6H8E3qA=='
+    let endpoint : string = `${environment.api_endpoint}/api/cost${region}?${environment.api_code}`;
         
     return this.http.get<Sku[]>(endpoint,
       {

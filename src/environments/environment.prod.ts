@@ -1,3 +1,6 @@
+
 export const environment = {
-  production: true
+  production: true,
+  api_code: 'CODE_ENDPOINT',
+  api_endpoint:  'ENDPOINT'
 };
