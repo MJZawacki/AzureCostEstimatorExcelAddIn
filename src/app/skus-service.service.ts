@@ -36,7 +36,7 @@ export class SkusService {
   
   
   public getCosts(input : any ) : Observable<Sku[]> {
-    let endpoint : string = `${environment.api_endpoint}/api/costmodel?${environment.api_code}`;
+    let endpoint : string = `${environment.api_endpoint}/api/costmodel?code=${environment.api_code}`;
     return this.http.post<any>(endpoint, 
                 input,
                 {
@@ -67,7 +67,7 @@ export class SkusService {
 
 
   public getSkus(region : string ) : Observable<Sku[]> {
-    let endpoint : string = `${environment.api_endpoint}/api/cost/${region}?${environment.api_code}`;
+    let endpoint : string = `${environment.api_endpoint}/api/cost/${region}?code=${environment.api_code}`;
         
     return this.http.get<Sku[]>(endpoint,
       {
