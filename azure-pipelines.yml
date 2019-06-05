@@ -15,6 +15,16 @@ steps:
     versionSpec: '10.x'
   displayName: 'Install Node.js'
 
+- task: Bash@3
+  env:
+    ENDPOINT: '$(ENDPOINT)'
+    CODE_ENDPOINT: '$(CODE_ENDPOINT)'
+  inputs:
+    targetType: 'inline'
+    script: 'sed -i "s/ENDPOINT/$ENDPOINT/g" environment.ts
+      sed -i "s/CODE_ENDPOINT/$CODE_ENDPOINT/g" environment.prod.ts'
+    workingDirectory: '${Build.StagingDirectory}/src/environments'
+    
 - script: |
     npm install -g @angular/cli
     npm install
