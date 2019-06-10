@@ -13,31 +13,31 @@ export class SkusService {
   constructor(private http: HttpClient) { }
 
 
-  public calculateCosts(regions,skus,types,priorities,osvalues,quantities) : Observable<Sku[]> {
-    
-    var input = [];
-    for (var i in regions) {
+  public calculateCosts(regions, skus, types, priorities, osvalues, quantities): Observable<Sku[]> {
+
+    const input = [];
+    for (const i in regions) {
 
         input.push( {
-        "location": regions[i][0],
-        "name": skus[i][0],
-        "hours": 730,
-        "type": types[i][0],
-        "priority": priorities[i][0],
-        "os": osvalues[i][0],
-        "quantity": quantities[i][0]
+        location: regions[i][0],
+        name: skus[i][0],
+        hours: 730,
+        type: types[i][0],
+        priority: priorities[i][0],
+        os: osvalues[i][0],
+        quantity: quantities[i][0]
         });
     }
 
     return this.getCosts(input);
-    
-    
+
+
 }
-  
-  
-  public getCosts(input : any ) : Observable<Sku[]> {
-    let endpoint : string = `${environment.api_endpoint}/api/costmodel?code=${environment.api_code}`;
-    return this.http.post<any>(endpoint, 
+
+
+  public getCosts(input: any ): Observable<Sku[]> {
+    const endpoint = `${environment.api_endpoint}/api/costmodel?code=${environment.api_code}`;
+    return this.http.post<any>(endpoint,
                 input,
                 {
                   headers: new HttpHeaders({
@@ -47,7 +47,7 @@ export class SkusService {
                   map(result => result.costs),
                   catchError(this.handleError)
                 );
-  };
+  }
 
   private handleError(error: HttpErrorResponse) {
     if (error.error instanceof ErrorEvent) {
@@ -63,12 +63,12 @@ export class SkusService {
     // return an observable with a user-facing error message
     return throwError(
       'Something bad happened; please try again later.');
-  };
+  }
 
 
-  public getSkus(region : string ) : Observable<Sku[]> {
-    let endpoint : string = `${environment.api_endpoint}/api/cost/${region}?code=${environment.api_code}`;
-        
+  public getSkus(region: string ): Observable<Sku[]> {
+    const endpoint = `${environment.api_endpoint}/api/cost/${region}?code=${environment.api_code}`;
+
     return this.http.get<Sku[]>(endpoint,
       {
         headers: new HttpHeaders({

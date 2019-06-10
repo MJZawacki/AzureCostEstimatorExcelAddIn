@@ -28,7 +28,7 @@ export class SkusComponent implements OnInit {
   }
   @Input('selectedRow')
   set selectedRow(row: InputRowComponent) {
-    if ((row !== null) && (row.region != this._selectedRow.region)) {
+    if ((row !== null) && (row.region !== this._selectedRow.region)) {
       // update skus
       console.log('updating skus');
       this.allskus = [];
@@ -44,46 +44,50 @@ export class SkusComponent implements OnInit {
           this.allskus = skus;
           this.filteredskus = skus;
           this.progressUpdate.emit(false);
+
+          const newListString = this.allskus.map((sku) => sku.name);
+          this.validSkus.emit(newListString);
         });
       }
     }
     this._selectedRow = row;
 
-  } 
+  }
 
   @Output() updateSku = new EventEmitter<Sku>();
   @Output() progressUpdate = new EventEmitter<boolean>();
+  @Output() validSkus = new EventEmitter<string[]>();
 
   ngOnChanges(changes: {[propKey: string]: SimpleChange}) {
-    let log: string[] = [];
-    for (let propName in changes) {
-      if (propName == 'selectedRow') {
+    const log: string[] = [];
+    for (const propName in changes) {
+      if (propName === 'selectedRow') {
         console.log(`${propName} changed`);
-       
+
       }
     }
   }
- 
+
 
 
 
   ngOnInit() {
     console.log(`selected sku = ${this.selectedSku}`);
   }
- 
+
   onSelect(sku: Sku): void {
     this.selectedSku = sku;
     this.updateSku.emit(sku);
   }
- 
+
   onKey(skuFilter: string): void {
     console.log(skuFilter);
     // update skus list
-    this.filteredskus = this.allskus.filter((x:Sku) => x.name.includes(skuFilter));
+    this.filteredskus = this.allskus.filter((x: Sku) => x.name.includes(skuFilter));
   }
 
   onEnter(skuFilter: string): void {
-    if (this.filteredskus.length == 1) {
+    if (this.filteredskus.length === 1) {
       this.updateSku.emit(this.filteredskus[0]);
     }
   }
@@ -101,7 +105,7 @@ export class SkusComponent implements OnInit {
     // return an observable with a user-facing error message
     return throwError(
       'Something bad happened; please try again later.');
-  };
+  }
 }
 
 @Component({

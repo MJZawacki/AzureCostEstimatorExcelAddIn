@@ -1,8 +1,14 @@
 import { Component, ViewChild, AfterViewInit, NgZone, Directive, ViewEncapsulation } from '@angular/core';
 import * as OfficeHelpers from '@microsoft/office-js-helpers';
-import { SkusService } from './skus-service.service';
+import { SkusService, Sku } from './skus-service.service';
 import { InputRowComponent } from './input-row-component/input-row-component.component'
 import { fromEventPattern } from 'rxjs';
+import { MatDialog } from '@angular/material';
+import { SettingsDialogComponent } from './settings-dialog/settings-dialog.component';
+
+export interface SettingsDialogData {
+    region: string;
+}
 
 @Component({
   selector: 'app-root',
@@ -18,10 +24,34 @@ export class AppComponent {
 
   
   
-  constructor(private skuService: SkusService, private _ngZone: NgZone)
+  constructor(public dialog: MatDialog, private skuService: SkusService, private _ngZone: NgZone)
   {
     this.showProgress=false;
   }
+
+  defaultRegion = 'eastus'
+  openDialog(): void {
+    const dialogRef = this.dialog.open(SettingsDialogComponent, {
+      width: '300px',
+      height: '400px',
+      position: {
+          top: '100',
+          left: '100'
+      },
+      data: {region: this.defaultRegion}
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('The dialog was closed');
+      if (result !== undefined) {
+          // valid region?
+
+          // update region
+          this.defaultRegion = result.region;
+      }
+    });
+  }
+
 
   welcomeMessage = 'Welcome';
   selectedIndex;
@@ -38,52 +68,19 @@ export class AppComponent {
 
 
               const sheet = context.workbook.worksheets.getItemOrNullObject("Cost Model");
+              var expensesTable = context.workbook.tables.getItemOrNullObject("ExpensesTable");
 
-      
-
-              var expensesTable = context.workbook.tables.getItem("ExpensesTable");
-
-              const skuRange = expensesTable.columns
-              .getItem("Sku Name")
-              .getDataBodyRange().load();
-              const skuBinding = context.workbook.bindings.add(skuRange, "Range", "Skus");
-              
-              const skuSelections = fromEventPattern(
-                  async function addHandler(handler) {
-                      await Excel.run(async (context) => {
-                          skuBinding.onSelectionChanged.add(handler as (args: Excel.BindingSelectionChangedEventArgs) => Promise<any>);
-                          context.sync();
-                      });
-
-                  },
-                  async function removeHandler(handler) {
-                      await Excel.run(async (context) => {
-                          skuBinding.onSelectionChanged.remove(handler as (args: Excel.BindingSelectionChangedEventArgs) => Promise<any>);
-                          context.sync();
-                      });
-                  }
-              );
-
-
-              skuSelections.subscribe(args => this.onSelectionChange(args));
-
-              // check to see if sku name is selected and update skulist
-
-              if (Office.context.requirements.isSetSupported("ExcelApi", 1.2)) {
-                  sheet.getUsedRange().format.autofitColumns();
-                  sheet.getUsedRange().format.autofitRows();
-              }
-
-       
-              var selectedRange = context.workbook.getSelectedRange().load(["address", "rowIndex"]);
-              const selectionTest = skuRange.getIntersectionOrNullObject(selectedRange).load("address");
               await context.sync();
-              
-              console.log(selectedRange);
-              if (!selectionTest.isNullObject) {
-                  this.onSelectionChange({ startRow: selectedRange.rowIndex - 1 })
-
+              if (sheet.isNullObject) {
+                  // Create Sheet & Table
+                  this._setup(context);
+              } else if (expensesTable.isNullObject) {
+                  // Create Table
+                  this._setup(context, sheet);
+              } else {
+                this._setup(context, sheet, expensesTable);
               }
+              
               
 
               });
@@ -98,7 +95,36 @@ export class AppComponent {
       }
   }
 
+  private async _requireInRegionSku(newList: string[]) {
 
+
+    Excel.run(async function(context) {
+
+
+        const sheet = context.workbook.worksheets.getItem("Cost Model");
+        const expensesTable = sheet.tables.getItem("ExpensesTable");
+        const skuRange = expensesTable.columns
+        .getItem("Sku Name")
+        .getDataBodyRange();
+          // When you are developing, it is a good practice to
+          // clear the dataValidation object with each run of your code.
+          skuRange.dataValidation.clear();
+
+          //const nameSourceRange = context.workbook.worksheets.getItem("Names").getRange("A1:A3");
+      
+          let approvedListRule = {
+            list: {
+              inCellDropDown: true,
+              //source: "=Names!$A$1:$A$3"
+              source: newList.toString()
+            }
+          };
+          skuRange.dataValidation.rule = approvedListRule;
+          await context.sync();
+    });
+  
+  
+  }
 
 
   async  addRow() {
@@ -117,7 +143,7 @@ export class AppComponent {
           let columntitle = columns[0][i];
           switch (columntitle) {
           case "Region":
-              newrow.push("eastus");
+              newrow.push(this.defaultRegion);
               break;
           case "Sku Name":
               newrow.push("Standard_A8_v2");
@@ -275,56 +301,100 @@ export class AppComponent {
 
   // TODO change selection handler back to worksheet and test for sku selection - empty list when not selected
 
+  private async _setValidValues(context, range, list) {
+    range.dataValidation.clear();
+    let approvedListRule = {
+      list: {
+        inCellDropDown: true,
+        source: list
+      },
+      
+    };
+    range.dataValidation.rule = approvedListRule;
+
+    range.dataValidation.prompt = {
+        message: "",
+        showPrompt: false,
+        title: ""
+      };
+
+      
+  
+  }
   /** Create a new table with sample data */
+  private async _setup(context, sheet?, expensesTable?) {
+
+    if (sheet === undefined) {
+        sheet = await OfficeHelpers.ExcelUtilities.forceCreateSheet(context.workbook, "Cost Model");
+    
+        // await context.sync();
+    }
+    if (expensesTable === undefined) {
+        expensesTable = sheet.tables.add("A1:H1", true /*hasHeaders*/);
+        expensesTable.name = "ExpensesTable";
+        expensesTable.getHeaderRowRange().values = [["Region", "Sku Name", "Type", "Priority", "OS", "Quantity", "Monthly Cost", "Annual Cost"]];
+        expensesTable.rows.add(null /*add at the end*/, [
+            [this.defaultRegion, "Standard_A8_v2", "vm", "normal", "Windows", 1, null, null],
+            [this.defaultRegion, "Standard_A8_v2", "vm", "normal", "Windows", 1, null,null],
+            [this.defaultRegion, "Standard_A8_v2", "vm", "normal", "Windows", 1, null, null]
+        ]);
+    
+        expensesTable.showTotals = true;
+        // await context.sync();
+    }
+
+    const osRange = expensesTable.columns
+    .getItem("OS")
+    .getDataBodyRange().load();
+    this._setValidValues(context, osRange, 'Windows,Linux');
+    const typeRange = expensesTable.columns
+    .getItem("Type")
+    .getDataBodyRange().load();
+    this._setValidValues(context, typeRange, 'vm,storage');
+    const priorityRange = expensesTable.columns
+    .getItem("Priority")
+    .getDataBodyRange().load();
+    this._setValidValues(context, priorityRange, 'normal,low');
+    const skuRange = expensesTable.columns
+    .getItem("Sku Name")
+    .getDataBodyRange().load();
+    const skuBinding = context.workbook.bindings.add(skuRange, "Range", "Skus");
+
+    const skuSelections = fromEventPattern(
+        async function addHandler(handler) {
+            await Excel.run(async (context) => {
+                skuBinding.onSelectionChanged.add(handler as (args: Excel.BindingSelectionChangedEventArgs) => Promise<any>);
+                context.sync();
+            });
+
+        },
+        async function removeHandler(handler) {
+            await Excel.run(async (context) => {
+                skuBinding.onSelectionChanged.remove(handler as (args: Excel.BindingSelectionChangedEventArgs) => Promise<any>);
+                context.sync();
+            });
+        }
+    );
+
+        //skuSelections.subscribe(x => console.log(x));
+        skuSelections.subscribe(args => this.onSelectionChange(args));
+        //skuBinding.onSelectionChanged.add(this.onSelectionChange);
+
+
+    if (Office.context.requirements.isSetSupported("ExcelApi", 1.2)) {
+        sheet.getUsedRange().format.autofitColumns();
+        sheet.getUsedRange().format.autofitRows();
+    }
+
+    sheet.activate();
+    await context.sync();
+    
+  }
+
   async createTable() {
       await Excel.run(async (context) => {
-      await OfficeHelpers.ExcelUtilities.forceCreateSheet(context.workbook, "Cost Model");
-
-      const sheet = context.workbook.worksheets.getItem("Cost Model");
-      const expensesTable = sheet.tables.add("A1:H1", true /*hasHeaders*/);
-      expensesTable.name = "ExpensesTable";
-      expensesTable.getHeaderRowRange().values = [["Region", "Sku Name", "Type", "Priority", "OS", "Quantity", "Monthly Cost", "Annual Cost"]];
-
-      expensesTable.rows.add(null /*add at the end*/, [
-          ["eastus", "Standard_A8_v2", "vm", "normal", "Windows", 1, null, null],
-          ["eastus", "Standard_A8_v2", "vm", "normal", "Windows", 1, null,null],
-          ["eastus", "Standard_A8_v2", "vm", "normal", "Windows", 1, null, null]
-      ]);
-
-      expensesTable.showTotals = true;
-      const skuRange = expensesTable.columns
-      .getItem("Sku Name")
-      .getDataBodyRange().load();
-      const skuBinding = context.workbook.bindings.add(skuRange, "Range", "Skus");
-
-      const skuSelections = fromEventPattern(
-          async function addHandler(handler) {
-              await Excel.run(async (context) => {
-                  skuBinding.onSelectionChanged.add(handler as (args: Excel.BindingSelectionChangedEventArgs) => Promise<any>);
-                  context.sync();
-              });
-
-          },
-          async function removeHandler(handler) {
-              await Excel.run(async (context) => {
-                  skuBinding.onSelectionChanged.remove(handler as (args: Excel.BindingSelectionChangedEventArgs) => Promise<any>);
-                  context.sync();
-              });
-          }
-      );
-
-          //skuSelections.subscribe(x => console.log(x));
-          skuSelections.subscribe(args => this.onSelectionChange(args));
-          //skuBinding.onSelectionChanged.add(this.onSelectionChange);
-
-
-      if (Office.context.requirements.isSetSupported("ExcelApi", 1.2)) {
-          sheet.getUsedRange().format.autofitColumns();
-          sheet.getUsedRange().format.autofitRows();
-      }
-
-      sheet.activate();
-      await context.sync();
+          this._setup(context);
+          await context.sync();
       });
   }
 
@@ -342,14 +412,17 @@ export class AppComponent {
       this.showProgress = busyFlag;
   
   }
+
+  async updateValidSkus(skulist) {
+      this._requireInRegionSku(skulist);
+
+  }
+
   // TODO check to see if selection is still on a sku cell
   async updateSku(sku) {
       console.log(`updating ${sku}`);
       var selectedIndex = this.selectedIndex;
       Excel.run(async function(context) {
-
-    
-          
           const range = context.workbook.getSelectedRange();
           range.load("address");
 

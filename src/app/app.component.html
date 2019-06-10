@@ -10,10 +10,10 @@
            
             <button mat-button><mat-icon class="example-icon" aria-hidden="false" aria-label="Example heart icon" (click)='addRow()'>add</mat-icon></button>
             <button mat-button><mat-icon class="example-icon" aria-hidden="false" aria-label="Example delete icon" (click)='addCostColumns()'>attach_money</mat-icon></button>
-            <button mat-button><mat-icon class="example-icon" aria-hidden="false" aria-label="Example delete icon" (click)='createTable()'>settings</mat-icon></button>
+            <button mat-button><mat-icon class="example-icon" aria-hidden="false" aria-label="Example delete icon" (click)="openDialog()">settings</mat-icon></button>
           </mat-toolbar-row>
         </mat-toolbar>
         <mat-progress-bar *ngIf="showProgress" mode="indeterminate"></mat-progress-bar>
 
-    <app-skus class='skulist' [selectedRow]="inputRow" (updateSku)='updateSku($event)' (progressUpdate)='progressUpdate($event)'></app-skus>
+    <app-skus class='skulist' [selectedRow]="inputRow" (updateSku)='updateSku($event)' (progressUpdate)='progressUpdate($event)' (validSkus)='updateValidSkus($event)'></app-skus>
 </main>
